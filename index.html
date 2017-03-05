@@ -1,1 +1,142 @@
+<!Doctype html!>
+<html lang="en-us">
+<html>
 
+<head>
+    <meta charset="UTF-8">
+    <title>Psychic Game</title>
+    <link rel="stylesheet" type="text/css" href="/assets/css/reset.css">
+    <link rel="stylesheet" type="text/css" href="psychicStyle.css">
+</head>
+
+<body>
+    <div id="game">
+        <h1>
+    The Psychic Game
+  </h1>
+        <p class="guess">
+            Guess what letter I'm thinking of!
+            <br>
+            <input type="text" id="guessInput" />
+            <button id="guessBtn">
+                Guess
+            </button>
+        </p>
+        <p class="wins">
+            Wins:
+            <span id="winsElement"></span>
+        </p>
+        <p class="losses">
+            Losses:
+            <span id="lossElement"></span>
+        </p>
+        <p class="guessesLeft">
+            Guesses Left:
+            <span id="guessesLeftElement"></span>
+        </p>
+        <p class="guesses">
+            Your guesses so far:
+            <span id="guessesValElement"></span>
+        </p>
+    </div>
+    <script>
+    // computer will generate letter from array //
+    var computerChoices = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"];
+
+    // if user guess is correct it should be tallied as win and game restarts //
+    // if user guess is incorrect, incorrect letter should be displayed and guessing remaining should be counted down //
+    // if user fails to guess letter after 10 attempts, result should be tallied as loss and game restarts //
+    var wins = 0;
+    var losses = 0;
+    var guessesLeft = 10;
+    var guesses = 0;
+
+    var updateHtml = function() {
+        document.getElementById('winsElement').textContent = wins;
+        document.getElementById('lossElement').textContent = losses;
+        document.getElementById('guessesLeftElement').textContent = guessesLeft;
+        document.getElementById('guessesValElement').textContent = guesses;
+    };
+    updateHtml();
+
+    /**
+     * createComputerGuess - Creates a new guess from a - z and returns it
+     * @returns {String}
+     */
+    var createComputerGuess = function() {
+        return computerChoices[Math.floor(Math.random() *
+            computerChoices.length - 1)];
+    };
+    //Initial computer guess
+    var computerGuess = createComputerGuess();
+
+    /**
+     * resetVariables - Resets guesses/guessesLeft and recreates computerGuess
+     * there are multiple instances where we did this logic repeatedly, so I create a function to keep code from being bloated
+     */
+    var resetVariables = function() {
+        computerGuess = createComputerGuess();
+        guessesLeft = 10;
+        guesses = 0;
+    };
+
+    //1) User needs to type 1 letter inside input box
+    //2) Click Guess button
+    //3) Update DOM/HTML
+    var guessInput = document.getElementById('guessInput');
+    guessInput.addEventListener('input', function(event) {
+        //Validate Letter
+        //Need to find out if the value of 'this' guessInput element is a letter
+        if (!(/^[a-zA-Z]*$/.test(this.value))) { //(!window.isNaN(this.value)) {
+            //This is not a letter, (is a number), throw error, blank out value
+            this.value = '';
+            alert('[Error] - A letter is requred here.');
+        }
+
+        //If the value's lenght is greater than 1, no good
+        if (this.value.length > 1) {
+            this.value = this.value.substr(0, 1);
+            alert('[Error] - Only one letter can be input per guess.');
+        }
+    });
+
+    //Guess button listener & handler
+    var guessBtn = document.getElementById('guessBtn');
+    guessBtn.addEventListener('click', function(event) {
+        //Make sure there are exactly 1 character
+        if (guessInput.value.length === 1) {
+            //All is good, now check users guess is equal to computers guess
+            guessesLeft = guessesLeft - 1;
+            guesses = guesses + 1;
+
+            if (guessInput.value === computerGuess) {
+                //Correct! Increment wins & reset all others (losses, guessest left, remaining)
+                alert('You win! the correct value was, in fact, ' + computerGuess);
+
+                //Reset the computer guess & all other values
+                resetVariables();
+                wins = wins + 1;
+            } else {
+                alert('Nice try but incorrect... Keep guessing');
+
+                // user will have 10 attempts to guess the computers letter //
+                if (guessesLeft === 0) {
+                    //All out of guesses, reset everything, try again next time
+                    alert('You Lose! You are all out of guesses, better luck next time.');
+                    resetVariables();
+                    losses = losses + 1;
+                }
+            }
+
+            guessInput.value = '';
+            guessInput.focus();
+            updateHtml();
+        } else {
+            //Throw error, have at least one character
+            alert('[User Error]: Guess requires 1 letter.')
+        }
+    });
+    </script>
+</body>
+
+</html>
